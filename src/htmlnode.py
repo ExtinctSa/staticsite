@@ -20,7 +20,7 @@ class HTMLNode:
         )
 
 class LeafNode(HTMLNode):
-    def __init__(self, value, tag=None, props=None):
+    def __init__(self, value, tag=None, props=None, is_raw=False):
         super().__init__(tag=tag, value=value, children=[], props=props)
 
     def to_html(self):
@@ -36,7 +36,7 @@ class ParentNode(HTMLNode):
     def __init__(self, tag, children, props=None):
         if not tag:
             raise ValueError("ParentNode must have a tag")
-        if children is None or not isinstance(children, list) or len(children) == 0:
+        if children is None or not isinstance(children, list):
             raise ValueError("ParentNode must have children")
         for child in children:
             if not isinstance(child, HTMLNode):
@@ -48,3 +48,5 @@ class ParentNode(HTMLNode):
         children_html = "".join(child.to_html() for child in self.children)
         return f"<{self.tag}{props_str}>{children_html}</{self.tag}>"
 
+def html_escape(text):
+    return html.escape(text)

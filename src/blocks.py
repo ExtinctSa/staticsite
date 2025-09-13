@@ -9,10 +9,7 @@ class BlockType(Enum):
     ORDERED_LIST = "ordered_list"
 
 def markdown_to_blocks(markdown):
-    markdown = markdown.strip()
-    raw_blocks = re.split(r'\n\s*\n', markdown)
-    blocks = [block.strip() for block in raw_blocks if block.strip()]
-    return blocks
+    return [block.strip() for block in markdown.split('\n\n') if block.strip()]
 
 def block_to_block_type(block):
     lines = block.split('\n')
