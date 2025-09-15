@@ -32,10 +32,41 @@ def markdown_to_html_node(markdown):
             node = ParentNode("pre", [LeafNode(code_text, "code")])
 
         elif block_type == BlockType.QUOTE:
-            lines = [line[1:].strip() for line in block.split("\n")]
-            content = " ".join(lines)
-            node = ParentNode("blockquote", children=text_to_children(content))
+            raw_lines = block.split("\n")
+            # Remove leading '>' and optional space
+            stripped = []
+            for line in raw_lines:
+                if line.startswith(">"):
+                    s = line[1:]
+                    if s.startswith(" "):
+                        s = s[1:]
+                    stripped.append(s)
+                else:
+                    stripped.append(line)
 
+            # Take only lines up to the first empty line
+            quote_lines = []
+            remaining_lines = []
+            found_blank = False
+
+            for s in stripped:
+                if not found_blank and s.strip() == "":
+                    found_blank = True
+                    continue
+                if not found_blank:
+                    quote_lines.append(s)
+                else:
+                    remaining_lines.append(s)
+
+            # Build the blockquote node
+            quote_content = " ".join(quote_lines)
+            block_nodes.append(ParentNode("blockquote", children=text_to_children(quote_content)))
+
+            # If there's remaining attribution (non-empty), render as paragraph
+            if any(line.strip() for line in remaining_lines):
+                remaining_text = " ".join(line.strip() for line in remaining_lines)
+                block_nodes.append(ParentNode("p", children=text_to_children(remaining_text)))
+            continue
         elif block_type == BlockType.UNORDERED_LIST:
             items = [line[2:].strip() for line in block.split("\n")]
             children = [ParentNode("li", children=text_to_children(item)) for item in items]

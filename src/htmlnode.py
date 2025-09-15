@@ -10,7 +10,10 @@ class HTMLNode:
     def props_to_html(self):
         if not self.props:
             return ""
-        return " " + " ".join(f'{key}="{html.escape(str(value), quote=True)}"' for key, value in self.props.items())
+        parts = []
+        for k, v in self.props.items():
+            parts.append(f'{k}="{html.escape(str(v), quote=True)}"')
+        return " " + " ".join(parts)
 
 
     def __repr__(self):
@@ -22,15 +25,17 @@ class HTMLNode:
 class LeafNode(HTMLNode):
     def __init__(self, value, tag=None, props=None, is_raw=False):
         super().__init__(tag=tag, value=value, children=[], props=props)
+        self.is_raw = is_raw
 
     def to_html(self):
         if self.value is None:
             raise ValueError("LeafNode must have a value")
         props_str = self.props_to_html()
-        escaped_value = html.escape(str(self.value))
+        # Don’t escape element text content
+        text = str(self.value) if self.value is not None else ""
         if self.tag:
-            return f"<{self.tag}{props_str}>{escaped_value}</{self.tag}>"
-        return escaped_value
+            return f"<{self.tag}{props_str}>{text}</{self.tag}>"
+        return text
 
 class ParentNode(HTMLNode):
     def __init__(self, tag, children, props=None):
