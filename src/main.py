@@ -1,7 +1,8 @@
 import os
 import shutil
 import logging
-from gencontent import generate_page
+from gencontent import generate_pages_recursive
+import sys
 def clear_directory(dir_path):
     """Deletes all contents inside the given directory. Recreates it if missing."""
     if os.path.exists(dir_path):
@@ -27,10 +28,11 @@ def copy_recursive(src, dest):
 
 def main():
     static_dir = 'static'
-    public_dir = 'public'
-    content_path = 'content/index.md'
+    public_dir = 'docs'
+    content_path = 'content'
     template_path = 'template.html'
-    output_path = os.path.join(public_dir, 'index.html')
+    output_path = public_dir
+    basepath = sys.argv[1] if len(sys.argv) > 1 else '/'
 
     if not os.path.exists(static_dir):
         logging.error(f"Source directory '{static_dir}' does not exist. Aborting.")
@@ -46,7 +48,7 @@ def main():
     copy_recursive(static_dir, public_dir)
 
     logging.info("Sync complete.")
-    generate_page(content_path, template_path, output_path)
+    generate_pages_recursive(content_path, template_path, output_path, basepath)
 
     logging.info("Site generation complete.")
 
